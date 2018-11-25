@@ -1,6 +1,6 @@
 <template>
-  <div ref="marqueeMessage2" class="marquee-message">
-    <ul class="temp-wrap2" ref="tempWrap2">
+  <div id="roll-message" class="roll-message">
+    <ul class="temp-wrap">
       <slot></slot>
     </ul>
   </div>
@@ -13,12 +13,14 @@
       return {
         activeIndex: 0,
         slideLength: 0,
+        hasObserve: false,
         timer: ''
       }
     },
     mounted () {
       this.$nextTick(() => {
         this.init()
+        this.observe()
       })
     },
     updated () {
@@ -31,21 +33,24 @@
         }
         this.activeIndex = 0
         
-        let tempWrap = this.$refs.tempWrap2
-        tempWrap.style.cssText = ''
+        let $rollMessage = document.querySelector('#roll-message')
+        let $tempWrap = $rollMessage.querySelector('.temp-wrap')
+        $tempWrap.style.cssText = ''
 
-        let childs = tempWrap.children
-        this.slideLength = childs.length
+        this.slideLength = $tempWrap.children.length
 
-        let firstChild = childs[0].cloneNode(true)
-        tempWrap.appendChild(firstChild)
+        // 克隆 temp-wrap 第一个子元素，并添加到末尾
+        let $firstChild = $tempWrap.firstChild.cloneNode(true)
+        $tempWrap.appendChild($firstChild)
 
+        // 开始滚动
         this.timer = setInterval(() => {
           if (this.activeIndex <= this.slideLength) {
-            tempWrap.style.cssText = `transform: translateY(-${this.activeIndex * 0.6}rem); transition: transform .4s ease`
+            let cssText = `transition: transform .4s ease; transform: translate3d(0, -${this.activeIndex * 0.6}rem, 0);`
+            $tempWrap.style.cssText = cssText
             this.activeIndex ++
           } else {
-            tempWrap.style.cssText = ''
+            $tempWrap.style.cssText = ''
             this.activeIndex = 0
           }
         }, 3000)
@@ -55,7 +60,7 @@
 </script>
 
 <style lang="scss" scoped>
-  .marquee-message {
+  .roll-message {
     width: 100%;
     height: .6rem;
     margin: 1rem 0;

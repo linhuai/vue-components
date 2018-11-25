@@ -1,9 +1,11 @@
 <template>
   <div>
-    <div class="marquee-message" id="marquee-message" ref="marqueeMessage">
-      <ul ref="tempSlides">
-        <slot></slot>
-      </ul>
+    <div class="marquee-message" id="marquee-message">
+      <div class="temp-wrap" ref="tempWrap">
+        <ul class="temp-slides">
+          <slot></slot>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -18,10 +20,7 @@
       }
     },
     data () {
-      return {
-        marquee: '',
-        tempWrapWidth: 0
-      }
+      return {}
     },
     mounted () {
       console.log('mounted')
@@ -34,26 +33,24 @@
     },
     methods: {
       init () {
-        if (document.querySelector('.temp-wrap')) {
-          document.querySelector('.temp-wrap').parentNode.removeChild(document.querySelector('.temp-wrap'))
+        let $marqueeMessage = document.querySelector('#marquee-message')
+        let $tempWrap = $marqueeMessage.querySelector('.temp-wrap')
+
+        // 如果 DOM 发生变化，重新初始化的时候，删除 clone DOM
+        let $tempSlidesClone = $tempWrap.querySelector('.temp-slides-clone')
+        if ($tempSlidesClone) {
+          $tempSlidesClone.parentNode.removeChild($tempSlidesClone)
         }
-        let tempSlides = this.$refs.tempSlides
-        tempSlides.className = 'temp-slides'
 
-        // 克隆一个 tempSlides
-        let tempSlidesClone = tempSlides.cloneNode(true)
-        tempSlidesClone.className = 'temp-slides-clone'
+        // 克隆一个 tempSlides 并添加到 temp-wrap
+        let $tempSlides = $tempWrap.querySelector('.temp-slides')
+        $tempSlidesClone = $tempSlides.cloneNode(true)
+        $tempSlidesClone.className = 'temp-slides-clone'
+        $tempWrap.appendChild($tempSlidesClone)
 
-        let tempWrap = document.createElement('div')
-        tempWrap.className = 'temp-wrap'
-
-        tempWrap.appendChild(tempSlides)
-        tempWrap.appendChild(tempSlidesClone)
-
-        let marqueeMessage = this.$refs.marqueeMessage
-        marqueeMessage.appendChild(tempWrap)
-        let duration = document.querySelector('.temp-wrap').offsetWidth / this.speed
-        document.querySelector('.temp-wrap').style.cssText = `animation: roll ${duration}s linear infinite; display: flex; white-space: nowrap;`
+        // 开始滚动
+        let duration = $tempSlides.offsetWidth / this.speed
+        document.querySelector('.temp-wrap').style.animationDuration = `${duration}s`
       }
     }
   }
@@ -70,11 +67,11 @@
     background: #333;
     color: #fff;
     margin: 0 auto;
-    // .temp-wrap {
-    //   display: flex;
-    //   white-space: nowrap;
-    //   animation: roll 10s linear infinite;
-    // }
+    .temp-wrap {
+      display: flex;
+      white-space: nowrap;
+      animation: roll linear infinite;
+    }
     .temp-slides, .temp-slides-clone {
       display: flex;
       white-space: nowrap;
@@ -85,10 +82,10 @@
   }
   @keyframes roll {
     0% {
-      transform: translate(0)
+      transform: translate3d(0, 0, 0)
     }
     100% {
-      transform: translate(-50%)
+      transform: translate3d(-50%, 0, 0)
     }
   }
 </style>
